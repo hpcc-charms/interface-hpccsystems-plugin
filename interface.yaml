@@ -1,0 +1,5 @@
+name: plugin
+summary: Basic HPCCSystems Platform plugins interface
+version: 0.1
+repo: https://github.com/hpcc-charms/interface-hpccsystems-plugin-configure
+
