@@ -28,25 +28,28 @@ from charms.reactive.bus import (
 from charms.layer.jujuenv import JujuEnv
 
 
-class HPCCPluginRequires(RelationBase):
+class HPCCPluginsRequires(RelationBase):
     scope = scopes.GLOBAL
 
     @hook('{requires:plugin}-relation-joined')
     def joined(self):
-        set_state('{relation_name}.joined')
-        status_set('active', JujuEnv.STATUS_MSG['PLUGIN_JOINED'])
-
-    @hook('{requires:hpcc-plugin}-relation-{changed}')
-    def changed(self):
-        if is_state('{relation_name}.joined'):
-           set_state('{relation_name}.available')
-           return
-
         conv = self.conversation()
-        msg = conv.get_remote('provides_side_msg')
-        if action:
-           set_state('{relation_name}.' +msg)
-           return
+        conv.set_state('{relation_name}.joined')
+        status_set('maintenance', JujuEnv.STATUS_MSG['INSTALL_PLUGIN'])
+
+    @hook('{requires:plugin}-relation-{changed}')
+    def changed(self):
+        conv = self.conversation()
+        if conv.is_state('{relation_name}.joined'):
+           conv.set_state('{relation_name}.available')
+           conv.remove_state('{relation_name}.joined')
+           status_set('active', JujuEnv.STATUS_MSG['PLUGIN_AVAILABLE'])
+           return 
+        #conv = self.conversation()
+        #msg = conv.get_remote('provides_side_msg')
+        #if action:
+        #   set_state('{relation_name}.' +msg)
+        #   return
 
     @hook('{requires:pluin}-relation-departed')
     def departed(self):
